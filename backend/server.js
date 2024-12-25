@@ -15,8 +15,11 @@ const rooms = {};
 wss.on("connection", (ws) => {
   console.log("a new user joined");
   ws.on("message", (message) => {
+    // data recieved
     const data = JSON.parse(message);
-    console.log("this is the data : - ", data);
+    console.log("this is the data on the server side: - ", data);
+
+    // again sent to the client
     ws.send(JSON.stringify(data));
   });
 

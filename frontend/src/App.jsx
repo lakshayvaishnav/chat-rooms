@@ -12,14 +12,17 @@ function App() {
 
   useEffect(() => {
     ws.current = new WebSocket("ws://localhost:8000");
+
+    // on connection we sent a message to the ws
     ws.current.onopen = () => {
       console.log("connected to the server");
       ws.current.send(JSON.stringify({ message: "a new user joined : ⚡" }));
     };
 
+    // here we are listening for any incoming messages
     ws.current.onmessage = (event) => {
       console.log(
-        "this is the message received from the server : ",
+        "this is the message received  : ",
         event.data
       );
       setmessages((prev) => [...prev, { message: event.data }]);
@@ -56,7 +59,7 @@ function App() {
 
       <div>
         <h1>messages sent on the server</h1>
-        <p>{`message : `}</p>
+        <p>{`message : ${messages}`}</p>
       </div>
     </>
   );
