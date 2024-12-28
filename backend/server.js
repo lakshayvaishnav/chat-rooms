@@ -71,6 +71,22 @@ wss.on("connection", (ws) => {
         }
       });
     }
+
+    //Broadcasting the message to the room.
+    if (data.type == "message") {
+      const { roomId, message } = data.payload;
+      if (!roomId) {
+        ws.send(JSON.stringify({ type: "error", payload: "invalid room Id" }));
+        console.log("⚠️ invalid room Id");
+        return;
+      }
+      // getting all the clients
+      const roomClients = rooms.get(roomId);
+      roomClients.forEach((client)=> {
+        ws.send(JSON.stringify({type:"message", payload:message}))
+        console.log("message sent to clinet : ", client)
+      })
+    }
   });
 
   ws.on("close", () => {
