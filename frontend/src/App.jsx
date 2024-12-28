@@ -4,13 +4,12 @@ import ChatRoom from "./ChatRoom";
 import HomeRoom from "./HomeRoom";
 import { useState } from "react";
 function App() {
-  const [user, setuser] = useState(null); // {username , avatar}
-
+  const [user , setUser] = useState(null);
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomeRoom setuser={setuser} />} />
-        <Route path="/chat" element={<ChatRoom user={user} />} />
+        <Route path="/" element={<HomeRoom  setUser={setUser}/>} />
+        <Route path="/chat/:roomId" element={<ChatRoom  user={user}/>} />
       </Routes>
     </BrowserRouter>
   );
