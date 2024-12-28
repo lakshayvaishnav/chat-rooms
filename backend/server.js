@@ -29,7 +29,6 @@ wss.on("connection", (ws) => {
 
   ws.on("message", (message) => {
     const data = JSON.parse(message.toString());
-    console.log("data : ", data);
 
     // logic to create a new room.
     if (data.type == "create_room") {
@@ -44,7 +43,8 @@ wss.on("connection", (ws) => {
 
     // logic to join a new room.
     if (data.type == "join_room") {
-      const { roomId } = data.payload.roomId;
+      const { roomId } = data.payload;
+      console.log("⚠️ the room id is : ", roomId);
       if (!rooms.has(roomId)) {
         ws.send(
           JSON.stringify({ type: "Error", payload: "Room Id not found" })
@@ -57,11 +57,15 @@ wss.on("connection", (ws) => {
 
       // add current user too.
       roomClients.add(ws);
+      ws.send(
+        JSON.stringify({ type: "message", payload: `Joined room ${roomId}` })
+      );
 
       // Broadcasting the message to each client except the current client
+      console.log("✅ sending message to each clients");
       roomClients.forEach((client) => {
         if (client !== ws) {
-          ws.send(
+          client.send(
             JSON.stringify({
               type: "message",
               payload: "a new user joined the room",
@@ -70,22 +74,30 @@ wss.on("connection", (ws) => {
           console.log("new user joined the room ");
         }
       });
+
+      ws.on("close", () => {
+        // if 0 websocket connections the delete the room.
+        roomClients.delete(ws);
+        if (roomClients.size == 0) {
+          rooms.delete(roomId);
+        }
+      });
     }
 
     //Broadcasting the message to the room.
     if (data.type == "message") {
       const { roomId, message } = data.payload;
-      if (!roomId) {
+      if (!rooms.has(roomId)) {
         ws.send(JSON.stringify({ type: "error", payload: "invalid room Id" }));
         console.log("⚠️ invalid room Id");
         return;
       }
       // getting all the clients
       const roomClients = rooms.get(roomId);
-      roomClients.forEach((client)=> {
-        ws.send(JSON.stringify({type:"message", payload:message}))
-        console.log("message sent to clinet : ", client)
-      })
+      roomClients.forEach((client) => {
+        client.send(JSON.stringify({ type: "message", payload: message }));
+        console.log("message sent to clinet : ", client);
+      });
     }
   });
 
